@@ -1,0 +1,19 @@
+{
+  "name": "treesearchvisualized",
+  "version": "1.0.0",
+  "description": "I want to use my knowledge of js html and css to concisely represent network search methods like BFS and DFS",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/hellokugelblitz/NetworkSearchVisualized.git#main"
+  },
+  "author": "Jack LN",
+  "license": "MIT",
+  "bugs": {
+    "url": "https://github.com/hellokugelblitz/NetworkSearchVisualized/issues"
+  },
+  "homepage": "https://github.com/hellokugelblitz/NetworkSearchVisualized/tree/main#readme"
+}
