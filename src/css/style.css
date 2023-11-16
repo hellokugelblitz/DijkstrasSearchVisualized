@@ -1,0 +1,42 @@
+body {
+    font-family: 'Poppins', sans-serif;
+    font-family: 'PT Serif', serif;
+    font-family: 'Roboto Condensed', sans-serif;
+    background-color: rgb(72, 72, 72);
+}
+
+.circle {
+    align-self: center;
+    position: absolute;
+    width: 100px;
+    height: 100px;
+    top: 300px;
+    left:300px;
+    background-color: rgb(108, 108, 108);
+    border: 3px solid rgb(62, 55, 161);
+    border-spacing: 50px;
+    border-radius: 9999px;
+    transition: 0.2s;
+    align-items: center;
+    padding: 5px;
+    color: rgb(62, 55, 161);
+    font-size:x-large;
+}
+
+.circle:hover {
+    width: 55px;
+    height: 55px;
+}
+
+.circle p {
+    position: absolute;
+    text-align:center; 
+    vertical-align: middle;
+    align-self: center;
+    margin-left: 30%;
+    margin-top: 20%;
+}
+
+.line {
+    border-bottom: 1px solid #888;
+  }
