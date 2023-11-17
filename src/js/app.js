@@ -1,6 +1,11 @@
 NODE_WIDTH = 50;
 NODE_HEIGHT = 50;
 ALPHABET = "ABCDEFGHIJKLMNOPQRSTUVWXYZ"
+LINE_HOLDER = document.getElementById("lineHolder");
+var hovering = false;
+var isMouseDown = false;
+var currentSelectedDom = null;
+var shiftPressed = false;
 
 // GRAPH CLASS
 class Graph {
@@ -60,6 +65,17 @@ class Graph {
     currentLength(){
         return this.AdjList.size;
     }
+
+    //Returns letter and DOM element from just letter
+    returnNodeFromLetter(letter){
+        var get_keys = this.AdjList.keys();
+    
+        for (var i of get_keys) {
+            if(i[1] == letter){
+                return i;
+            }
+        }
+    }
  
     // bfs(v)
 
@@ -69,48 +85,141 @@ class Graph {
 var graph = new Graph();
 
 document.addEventListener('DOMContentLoaded', function () {
-    document.addEventListener('click', function (event) {
-        // Get the coordinates of the click
-        var x = event.clientX;
-        var y = event.clientY;
 
-        //Create the DOM element
-        const newNode = document.createElement("div");
-        newNode.className = "circle";
-        newNode.style.width = NODE_WIDTH + "px";
-        newNode.style.height = NODE_HEIGHT + "px";
-        newNode.style.top = (y-NODE_HEIGHT/2) + "px";
-        newNode.style.left = (x-NODE_WIDTH/2) + "px";
-        newNode.innerHTML = "<p>" + ALPHABET[graph.currentLength()] + "</p>";
-        document.body.appendChild(newNode);
+    var currentElementTarget = null;
 
-        //We want to add this new node to the graph
-        //Each is a TUPLE, where we have a reference to the DOM element and a letter associated with it.
-        graph.addVertex((newNode, ALPHABET[graph.currentLength()]));
+        document.addEventListener('mousedown', function (event) {
+            // Get the coordinates of the click
+            var x = event.clientX;
+            var y = event.clientY;
 
-        //Defining newNode Behaviors
-        newNode.onmouseover = onNodeHover;
-        newNode.onmouseout = onNodeHover;
+            if(hovering == false){
+                //Create the DOM element
+                const newNode = document.createElement("div");
+                newNode.className = "circle";
+                newNode.style.width = NODE_WIDTH + "px";
+                newNode.style.height = NODE_HEIGHT + "px";
+                newNode.style.top = (y-NODE_HEIGHT/2) + "px";
+                newNode.style.left = (x-NODE_WIDTH/2) + "px";
+                newNode.innerHTML = "<p>" + ALPHABET[graph.currentLength()] + "</p>";
+                newNode.id = ALPHABET[graph.currentLength()];
+                document.body.appendChild(newNode);
 
-        //Print x and y of new node.
-        console.log(x,y); 
-        graph.printGraph();
-    });
+                //We want to add this new node to the graph
+                //Each is a TUPLE, where we have a reference to the DOM element and a letter associated with it.
+                graph.addVertex([newNode, ALPHABET[graph.currentLength()]]);
+
+                //Print x and y of new node.
+                console.log(x,y); 
+                
+                //Setting hovering = true because if we create a node we are automatically inside it.
+                hovering = true;
+
+            } else {
+                //If we are clicking on a 
+                currentElementTarget = event.target;
+                node = graph.returnNodeFromLetter(currentElementTarget.id);
+                isMouseDown = true;
+            }
+        });
+
+        document.addEventListener('mouseup', function (event) {
+            isMouseDown = false;
+        });
+
+        document.addEventListener('mousemove', function (event) {
+            var x = event.clientX;
+            var y = event.clientY;
+            
+            handleNodeAction()
+
+
+            if(isMouseDown){
+                if(shiftPressed){
+                    requestAnimationFrame(function () {
+                        node = graph.returnNodeFromLetter(currentElementTarget.id);
+                        node[0].style.top = (y - NODE_HEIGHT / 2) + "px";
+                        node[0].style.left = (x - NODE_WIDTH / 2) + "px";
+                    });
+                }
+            }
+        });
+
+        document.addEventListener("keydown", function (event) {
+            if(event.key == "Shift"){
+                shiftPressed = true
+                console.log("Shift is pressed")
+            }
+        });
+
+        document.addEventListener("keyup", function (event) {
+            if(event.key == "Shift"){
+                shiftPressed = false
+                console.log("Shift is released")
+            }
+        });
 });
 
+// Handle some node specific functionality
+function handleNodeAction(){
 
-// Node Based functions
+    for([node, value] of graph.AdjList){
+        var letter = node[1]
+        var element = node[0]
 
-function onNodeIn(){
+        element.addEventListener('mouseout', function (event) {
+            if(isMouseDown != true){
+                console.log("setting hovering = false")
+                hovering = false;
+            }
+        });
 
+        element.addEventListener('mouseover', function (event) {
+            console.log("setting hovering = true")
+            hovering = true;
+        });
+
+        // function onNodeDown(){
+
+        //     element.style.top = (y-NODE_HEIGHT/2) + "px";
+        //     element.style.left = (x-NODE_WIDTH/2) + "px";
+        // }
+
+        // element.onmouseover = onNodeHover;
+        // element.onmouseleave = onNodeOut;
+        // element.onmouseout = onNodeOut;
+    
+        // element.on("mousedown", function(event){
+        //     isDown = true;
+            
+        //     var pOffset = svg.offset();
+        //     startX = event.clientX - pOffset.left,
+        //     startY = event.clientY - pOffset.top;
+          
+        // })
+        
+        // element.on("mouseup", function(){
+        //       isDown = false;
+        // })
+        
+        // svg.on("mousemove", function(event){
+        //   if(isDown){
+          
+        //    var pOffset = svg.offset(),
+        //             px = event.clientX - pOffset.left,
+        //             py = event.clientY - pOffset.top;
+          
+        //       line.attr("x1",startX)
+        //     line.attr("x2",px)
+        //     line.attr("y1",startY)
+        //     line.attr("y2",py)
+        //   }
+        // })
+    }
 }
 
-function onNodeHover(){
-    // newNode.style.width = NODE_WIDTH + "px";
-    // newNode.style.height = NODE_HEIGHT + "px";
-    console.log("hovering")
-}
 
-function onNodeOut(){
 
-}
+    // handleNodeAction()
+
+

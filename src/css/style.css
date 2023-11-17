@@ -6,12 +6,11 @@ body {
 }
 
 .circle {
+    cursor:pointer;
     align-self: center;
     position: absolute;
     width: 100px;
     height: 100px;
-    top: 300px;
-    left:300px;
     background-color: rgb(108, 108, 108);
     border: 3px solid rgb(62, 55, 161);
     border-spacing: 50px;
@@ -23,18 +22,44 @@ body {
     font-size:x-large;
 }
 
+.highlighted {
+    cursor:pointer;
+    align-self: center;
+    position: absolute;
+    width: 100px;
+    height: 100px;
+    background-color: rgb(95, 95, 95);
+    border: 3px solid rgb(161, 55, 55);
+    border-spacing: 50px;
+    border-radius: 9999px;
+    transition: 0.2s;
+    align-items: center;
+    padding: 5px;
+    color: rgb(161, 55, 55);
+    font-size:x-large;
+}
+
 .circle:hover {
     width: 55px;
     height: 55px;
 }
 
 .circle p {
+    
     position: absolute;
     text-align:center; 
     vertical-align: middle;
     align-self: center;
     margin-left: 30%;
     margin-top: 20%;
+
+    pointer-events:none;
+
+    -moz-user-select: -moz-none;
+   -khtml-user-select: none;
+   -webkit-user-select: none;
+   -ms-user-select: none;
+   user-select: none;
 }
 
 .line {
