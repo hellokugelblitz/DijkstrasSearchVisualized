@@ -1,2 +1,5 @@
-# NetworkSearchVisualized
-I want to use my knowledge of js html and css to concisely represent network search methods like BFS and DFS
+# DijkstrasSearchVisualized
+Wanted to play around with Dijkstra's pathfinding algorithm. I used my JS, HTML, and CSS skills to demo it 🚀
+
+Here is a screenshot of the UI:
+
