@@ -3,4 +3,4 @@ Wanted to play around with Dijkstra's pathfinding algorithm. I used my JS, HTML,
 
 Here is a screenshot of the UI:
 <br>
-<img src="demo.png"></img>
+![alt text](demo.png)
