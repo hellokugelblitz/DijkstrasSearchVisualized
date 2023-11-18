@@ -3,16 +3,39 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Your Web App</title>
+    <title>Graph Search</title>
     <link rel="stylesheet" href="css/style.css">
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=PT+Serif&family=Poppins:wght@100;200;500&family=Roboto+Condensed:wght@300;500&display=swap" rel="stylesheet">
 </head>
-<body>
-    <svg id="lineHolder" width="1000px" height="1000px" version="1.1" xmlns="http://www.w3.org/2000/svg">
-         <line id="line" x1="300" y1="10" x2="90" y2="90" stroke="blue" />
-      </svg>
+<body onload="windowResize()">
+
+    <div class="controls" id="controls">
+        <p class="title">Controls:</p>
+
+        <select name="selector-one" id="selector-one">
+        </select>
+
+        <button type="button" onclick="deleteNode()" >Delete Node</button>
+        <button style="margin-top: 5px;" type="button" onclick="clearGraph()" >Clear Graph</button>
+        <button style="margin-top: 5px;" type="button" onclick="printGraph()" >Print Graph</button>
+        <br>
+
+        <select name="selector-two" id="selector-two">
+        </select>
+
+        <select name="selector-three" id="selector-three">
+        </select>
+
+        <button style="margin-top: 5px;" type="button" onclick="dijkstrasPath()" >Dijkstra's</button>
+    </div>
+
+    <svg style="z-index: 1;" id="lineHolder" width="4000px" height="4000px" version="1.1" xmlns="http://www.w3.org/2000/svg">
+    </svg>
+
+
+
     <script src="js/app.js"></script>
 </body>
 </html>
