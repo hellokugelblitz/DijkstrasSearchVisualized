@@ -24,6 +24,7 @@ var isMouseDown = false;
 var isMouseOnControls = false;
 var currentSelectedDom = null;
 var shiftPressed = false;
+var useWeighted = false;
 
 //Instantiating line placeholder
 var linePlaceHolder = document.createElementNS("http://www.w3.org/2000/svg", "line");
@@ -51,9 +52,14 @@ class Queue {
         let minIndex = -1;
 
         for (let i = this.frontIndex; i < this.backIndex; i++) {
-            if (this.items[i].priority < minPriority) {
-                minPriority = this.items[i].priority;
-                minIndex = i;
+            try{
+                console.log("HERE -> " + this.items[i].priority)
+                if (this.items[i].priority < minPriority) {
+                    minPriority = this.items[i].priority;
+                    minIndex = i;
+                }
+            } catch {
+                console.log("HERE -> " + this.items[i])
             }
         }
 
@@ -174,6 +180,27 @@ class Graph {
         return lineElements;
     }
 
+    //Returns the html Line element that connects two nodes.
+
+    //[DOM Element, "A"] : [[DOM Element, "B"], Line Dom Element, "START"]
+    getNodeSpecificConnection(nodeOne, nodeTwo){
+        var nodeOneConnections = this.AdjList.get(nodeOne);
+
+        console.log("Current number of connections: " + nodeOneConnections.length);
+    
+        for (let i = 0; i < nodeOneConnections.length; i++) {
+            console.log(nodeTwo[0], " == ", nodeOneConnections[i][0])
+            if(nodeOneConnections[i][0] == nodeTwo[0]){
+                var currentLine = nodeOneConnections[i][1];
+                return currentLine;
+            }
+
+            
+            //You can do something like this!
+            //currentLine.getAttribute("x1");
+        }
+    }
+
     //Removes a node, all you need is the letter
     //it also removes the corresponding item from the gui and all of its connections
     removeNodeFromLetter(letter){
@@ -236,44 +263,6 @@ class Graph {
         
         this.AdjList.set(vertex_two, updatedVertexListTwo);
     }
- 
-    // function to performs BFS
-    bfs(startingNode)
-    {
-    
-        // create a visited object
-        var visited = {};
-    
-        // Create an object for queue
-        var q = new Queue();
-    
-        // add the starting node to the queue
-        visited[startingNode] = true;
-        q.enqueue(startingNode);
-    
-        // loop until queue is empty
-        while (!q.isEmpty()) {
-            // get the element from the queue
-            var getQueueElement = q.dequeue();
-    
-            // passing the current vertex to callback function
-            console.log(getQueueElement);
-    
-            // get the adjacent list for current vertex
-            var get_List = this.AdjList.get(getQueueElement);
-    
-            // loop through the list and add the element to the
-            // queue if it is not processed yet
-            for (var i in get_List) {
-                var neigh = get_List[i];
-    
-                if (!visited[neigh]) {
-                    visited[neigh] = true;
-                    q.enqueue(neigh);
-                }
-            }
-        }
-    }
 
     distances = {};
 
@@ -281,7 +270,7 @@ class Graph {
         // Set initial distances to Infinity for all nodes
         const predecessors = {};
         for (const key of this.AdjList.keys()) {
-            this.distances[key] = 9999;
+            this.distances[key] = 999999;
             predecessors[key] = null;
         }
 
@@ -310,7 +299,15 @@ class Graph {
             for (const neighbor of neighbors) {
                 const [neighborVertex, line, lineStart] = neighbor;
 
-                const distanceToNeighbor = currentDistance + DEFAULT_LINE_WEIGHT;
+                var distanceToNeighbor = currentDistance;
+
+                if(!useWeighted){
+                    distanceToNeighbor += DEFAULT_LINE_WEIGHT;
+                } else {
+                    var thisLine = this.getNodeSpecificConnection(currentVertex, neighbor);
+                    var thisLinePos = [parseInt(thisLine.getAttribute("x1")), parseInt(thisLine.getAttribute("x2")), parseInt(thisLine.getAttribute("y1")),parseInt(thisLine.getAttribute("y2"))];
+                    distanceToNeighbor += Math.floor(calculateLineLength(thisLinePos[0], thisLinePos[2], thisLinePos[1], thisLinePos[3]));
+                }
 
                 if (distanceToNeighbor < this.distances[neighborVertex]) {
                     this.distances[neighborVertex] = distanceToNeighbor;
@@ -613,13 +610,12 @@ function dijkstrasPath(){
     var letter2 = D_TWO_SELECTOR.value;
 
     var shortestPath = graph.dijkstra(graph.returnNodeFromLetter(letter),graph.returnNodeFromLetter(letter2));
-    console.log("The distance is: " + shortestPath.distance);
-    console.log("Shortest path is: " + shortestPath.path);
+    // console.log("The distance is: " + shortestPath.distance);
+    // console.log("Shortest path is: " + shortestPath.path);
     for(var element of shortestPath.path){
         var connections = graph.getNodeConnections(element);
 
         for(let i = 0; i < connections.length; i++){
-            console.log(connections[i][0])
             
             if(shortestPath.path.includes(connections[i][0])){
                 connections[i][1].setAttribute("stroke", "#ba4c4c");
@@ -633,4 +629,26 @@ function dijkstrasPath(){
     }
 
 }
+
+// function resetHighlighting(){
+//     for(var key of graph.AdjList.keys()){
+//         this.removeNode(key);
+//     }
+// }
   
+function calculateLineLength(x1, y1, x2, y2) {
+    var distance = Math.sqrt(Math.pow(x2 - x1, 2) + Math.pow(y2 - y1, 2));
+    return distance;
+}
+
+function handleCheckBox() {
+    // Get the checkbox
+    var checkBox = document.getElementById("weighted");
+  
+    // If the checkbox is checked, display the output text
+    if (checkBox.checked == true){
+        useWeighted = true;
+    } else {
+        useWeighted = false;
+    }
+  }

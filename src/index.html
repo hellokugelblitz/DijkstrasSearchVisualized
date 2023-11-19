@@ -28,7 +28,9 @@
         <select name="selector-three" id="selector-three">
         </select>
 
-        <button style="margin-top: 5px;" type="button" onclick="dijkstrasPath()" >Dijkstra's</button>
+        <button style="margin-top: 5px;" type="button" onclick="dijkstrasPath()" >Dijkstra's</button><br>
+        <input style="margin-top: 5px;" type="checkbox" id="weighted" onclick="handleCheckBox()">
+        <label for="weighted">Use Weighted Graph</label>
     </div>
 
     <svg style="z-index: 1;" id="lineHolder" width="4000px" height="4000px" version="1.1" xmlns="http://www.w3.org/2000/svg">
