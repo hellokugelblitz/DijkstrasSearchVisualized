@@ -366,7 +366,7 @@ document.addEventListener('DOMContentLoaded', function () {
             if (!isMouseOnControls) {
                 //Or a node that already exists
                 if(graph.isEventTargetInMap(currentElementTarget) == false){
-                    
+                        resetHighlighting();
                         console.log("Placing new node")
                         //Create the new node physically
                         const newNode = document.createElement("div");
@@ -461,6 +461,7 @@ document.addEventListener('DOMContentLoaded', function () {
 
                 //For moving the nodes around!
                 if(shiftPressed){
+                    resetHighlighting();
 
                     //Move node
                     node = graph.returnNodeFromLetter(currentElementTarget.id);
@@ -477,14 +478,9 @@ document.addEventListener('DOMContentLoaded', function () {
                             nodeY = parseInt(node[0].style.top.slice(0,-2)) + NODE_WIDTH/2;
 
                             if(startOrEnd == LINE_START){
-                                console.log("moving line")
-                                // nodeX = parseInt(node[0].style.left.slice(0,-2)) + NODE_WIDTH/2;
-                                // nodeY = parseInt(node[0].style.top.slice(0,-2)) + NODE_WIDTH/2;
                                 line.setAttribute("x1", nodeX + "px");
                                 line.setAttribute("y1", nodeY + "px");
                             } else {
-                                // nodeX = parseInt(node[0].style.left.slice(0,-2)) + NODE_WIDTH/2;
-                                // nodeY = parseInt(node[0].style.top.slice(0,-2)) + NODE_WIDTH/2;
                                 line.setAttribute("x2", nodeX + "px");
                                 line.setAttribute("y2", nodeY + "px");
                             }
@@ -576,6 +572,7 @@ function clearGraph(){
 }
 
 function deleteNode(){
+    resetHighlighting();
     graph.removeNodeFromLetter(NODE_SELECTOR.value);
     updateDropDown();
 }
@@ -606,6 +603,7 @@ function updateDropDown(){
 }
 
 function dijkstrasPath(){
+    resetHighlighting();
     var letter = D_ONE_SELECTOR.value;
     var letter2 = D_TWO_SELECTOR.value;
 
@@ -630,11 +628,16 @@ function dijkstrasPath(){
 
 }
 
-// function resetHighlighting(){
-//     for(var key of graph.AdjList.keys()){
-//         this.removeNode(key);
-//     }
-// }
+function resetHighlighting(){
+    var currentNodes = graph.currentList();
+    for(var node of currentNodes){
+        node[0].style.borderColor = "#3e37a1";
+        node[0].style.color = "#3e37a1";
+        for(var connection of graph.getNodeConnections(node)){
+            connection[1].setAttribute("stroke", "#3e37a1");
+        }
+    }
+}
   
 function calculateLineLength(x1, y1, x2, y2) {
     var distance = Math.sqrt(Math.pow(x2 - x1, 2) + Math.pow(y2 - y1, 2));
