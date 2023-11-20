@@ -1,39 +1,39 @@
-NODE_WIDTH = 50;
-NODE_HEIGHT = 50;
+// *** Global Constants ***
+const NODE_WIDTH = 50;
+const NODE_HEIGHT = 50;
 
-LINE_START = "START";
-LINE_END = "END";
-VERTEX_DOM = 0;
-VERTEX_LINE = 1;
-VERTEX_START_OR_END = 2;
-DEFAULT_LINE_WEIGHT = 1;
+const LINE_START = "START";
+const LINE_END = "END";
+const VERTEX_DOM = 0;
+const VERTEX_LINE = 1;
+const VERTEX_START_OR_END = 2;
+const DEFAULT_LINE_WEIGHT = 1;
 
-//For Creating nodes
-ALPHABET = "ABCDEFGHIJKLMNOPQRSTUVWXYZ";
+const ALPHABET = "ABCDEFGHIJKLMNOPQRSTUVWXYZ";
 
-//Grabbing some references to our main html elements
-LINE_HOLDER = document.getElementById("lineHolder");
-CONTROL_PANEL = document.getElementById("controls");
-NODE_SELECTOR = document.getElementById("selector-one");
-D_ONE_SELECTOR = document.getElementById("selector-two");
-D_TWO_SELECTOR = document.getElementById("selector-three");
+const LINE_HOLDER = document.getElementById("lineHolder");
+const CONTROL_PANEL = document.getElementById("controls");
+const NODE_SELECTOR = document.getElementById("selector-one");
+const D_ONE_SELECTOR = document.getElementById("selector-two");
+const D_TWO_SELECTOR = document.getElementById("selector-three");
 
-//Some global variables for user interaction.
-var hovering = false;
-var isMouseDown = false;
-var isMouseOnControls = false;
-var currentSelectedDom = null;
-var shiftPressed = false;
-var useWeighted = false;
+//This class is used for handling user interaction. 
+//Basically just a struct that holds a bunch of data that I don't want to be global.
+class UI {
+    constructor(){
+        this.isMouseDown = false;
+        this.isMouseOnControls = false;
+        this.shiftPressed = false;
+        this.useWeighted = false;
+        this.linePlaceHolder = document.createElementNS("http://www.w3.org/2000/svg", "line");
+        LINE_HOLDER.appendChild(this.linePlaceHolder);
 
-//Instantiating line placeholder
-var linePlaceHolder = document.createElementNS("http://www.w3.org/2000/svg", "line");
-LINE_HOLDER.appendChild(linePlaceHolder);
+        //These are the coordinates for the new connect we are making at any given time and the node we start with.
+        this.currentNewLine = {startingNode:null,x1:"0",x2:"0",y1:"0",y2:"0"}
+    }
+}
 
-//These are the coordinates for the new connect we are making at any given time and the node we start with.
-var currentNewLine = {startingNode:null,x1:"0",x2:"0",y1:"0",y2:"0"}
-
-//Que Class is used for the searching algorithms -- Credit: GeeksForGeeks
+//Que Class is used for the searching algorithms -- Credit (mostly): GeeksForGeeks
 class Queue {
     constructor() {
         this.items = {};
@@ -41,19 +41,20 @@ class Queue {
         this.backIndex = 0;
     }
 
+    //Enqueues and element in the list with a priority, returns a string for confirmation.
     enqueue(element, priority) {
         this.items[this.backIndex] = { element, priority };
         this.backIndex++;
         return element + ' inserted';
     }
 
+    //Dequeues an element, returns the element dequeued or null.
     dequeue() {
         let minPriority = Infinity;
         let minIndex = -1;
 
         for (let i = this.frontIndex; i < this.backIndex; i++) {
             try{
-                console.log("HERE -> " + this.items[i].priority)
                 if (this.items[i].priority < minPriority) {
                     minPriority = this.items[i].priority;
                     minIndex = i;
@@ -73,17 +74,18 @@ class Queue {
         return null;
     }
 
+    //Used to determine if the queue is empty 
     isEmpty() {
         return this.frontIndex === this.backIndex;
-    }
-
-    get printQueue() {
-        return this.items;
     }
 }
 
 // GRAPH CLASS
 class Graph {
+
+    //Define a record of node distances (used for weighted traversal)
+    distances = {};
+
     // defining vertex array and
     // adjacent list
     constructor(noOfVertices = 0)
@@ -93,24 +95,20 @@ class Graph {
     }
  
     // add vertex to the graph
-    //[DOM Element, "A"]
-    addVertex(vertex)
+    addVertex(node)
     {
-        // initialize the adjacent list with a
-        // null array
-        this.AdjList.set(vertex, []);
+        // initialize the adjacent list
+        this.AdjList.set(node, []);
     }
 
     // add edge to the graph
-    // [DOM Element, "A"] : [[DOM Element, "B"], Line Dom Element, "START"]
-    addEdge(vertex, vertexTwo, line)
+    addEdge(node, node_two, line)
     {
-        //We add the connection between 
-        this.AdjList.get(vertex).push([vertexTwo, line, LINE_START]);
-    
-        // Since graph is undirected,
-        // add an edge from w to v also
-        this.AdjList.get(vertexTwo).push([vertex, line, LINE_END]);
+        //We add the connection one way
+        this.AdjList.get(node).push([node_two, line, LINE_START]);
+        
+        //Since the its undirected we add it in the opposite way as well.
+        this.AdjList.get(node_two).push([node, line, LINE_END]);
     }
 
     // Prints the vertex and adjacency list
@@ -137,52 +135,18 @@ class Graph {
         }
     }
 
-    //Returns current number of nodes in the graph
-    currentLength(){
-        return this.AdjList.size;
-    }
-
-    currentList(){
-        return this.AdjList.keys();
-    }
-
-    //Returns letter and DOM element from just letter
-    returnNodeFromLetter(letter){
-        var get_keys = this.AdjList.keys();
-    
-        for (var i of get_keys) {
-            if(i[1] == letter){
-                return i;
-            }
-        }
-    }
-
-    isEventTargetInMap(eventTarget){
-        var get_keys = this.AdjList.keys();
-    
-        for (var i of get_keys) {
-            if(eventTarget == i[0]){
-                return true;
-            }
-        }
-
-        return false;
-    }
-
     //Returns the list of connects associated with a specific node
     getNodeConnections(vertex){
-        var get_values = this.AdjList.get(vertex);    
+        var getValues = this.AdjList.get(vertex);    
         var lineElements = [];
 
-        for (var j of get_values)
+        for (var j of getValues)
             lineElements.push(j);
         
         return lineElements;
     }
 
     //Returns the html Line element that connects two nodes.
-
-    //[DOM Element, "A"] : [[DOM Element, "B"], Line Dom Element, "START"]
     getNodeSpecificConnection(nodeOne, nodeTwo){
         var nodeOneConnections = this.AdjList.get(nodeOne);
 
@@ -194,12 +158,30 @@ class Graph {
                 var currentLine = nodeOneConnections[i][1];
                 return currentLine;
             }
-
-            
-            //You can do something like this!
-            //currentLine.getAttribute("x1");
         }
     }
+
+    //Return a node from a given letter, for example 'A'
+    returnNodeFromLetter(letter){
+        var get_keys = this.AdjList.keys();
+        for (var i of get_keys) {
+            if(i[1] == letter){
+                return i;
+            }
+        }
+    }
+
+    //Used to determine if a dom element is a node.
+    isEventTargetInMap(eventTarget){
+        var get_keys = this.AdjList.keys();
+        for (var i of get_keys) {
+            if(eventTarget == i[0]){
+                return true;
+            }
+        }
+        return false;
+    }
+
 
     //Removes a node, all you need is the letter
     //it also removes the corresponding item from the gui and all of its connections
@@ -208,7 +190,7 @@ class Graph {
     }
 
 
-    //clear graph essentially deletes the entire graph
+    //clear essentially deletes the entire graph
     clear(){
         for(var key of this.AdjList.keys()){
             this.removeNode(key);
@@ -264,10 +246,8 @@ class Graph {
         this.AdjList.set(vertex_two, updatedVertexListTwo);
     }
 
-    distances = {};
-
     dijkstra(startingNode, endingNode) {
-        // Set initial distances to Infinity for all nodes
+        // Set initial distances to some really high value for all nodes
         const predecessors = {};
         for (const key of this.AdjList.keys()) {
             this.distances[key] = 999999;
@@ -277,7 +257,7 @@ class Graph {
         // Set the distance to the starting node to 0
         this.distances[startingNode] = 0;
 
-        // Create a priority queue (using your Queue class)
+        // Create a priority queue
         const priorityQueue = new Queue();
 
         // Enqueue the starting node with its distance
@@ -301,12 +281,13 @@ class Graph {
 
                 var distanceToNeighbor = currentDistance;
 
-                if(!useWeighted){
+                // Here we make the check, are we doing a weighted or unweighted calculation?
+                if(!userInterface.useWeighted){
                     distanceToNeighbor += DEFAULT_LINE_WEIGHT;
                 } else {
                     var thisLine = this.getNodeSpecificConnection(currentVertex, neighbor);
                     var thisLinePos = [parseInt(thisLine.getAttribute("x1")), parseInt(thisLine.getAttribute("x2")), parseInt(thisLine.getAttribute("y1")),parseInt(thisLine.getAttribute("y2"))];
-                    distanceToNeighbor += Math.floor(calculateLineLength(thisLinePos[0], thisLinePos[2], thisLinePos[1], thisLinePos[3]));
+                    distanceToNeighbor += Math.floor(this.calculateLineLength(thisLinePos[0], thisLinePos[2], thisLinePos[1], thisLinePos[3]));
                 }
 
                 if (distanceToNeighbor < this.distances[neighborVertex]) {
@@ -327,6 +308,13 @@ class Graph {
         };
     }
 
+    //Helper method, used to determine the distance between two (x,y) coordinates
+    calculateLineLength(x1, y1, x2, y2) {
+        var distance = Math.sqrt(Math.pow(x2 - x1, 2) + Math.pow(y2 - y1, 2));
+        return distance;
+    }
+
+    //Helper method, used to generate the path created in graph.dijkstra()
     buildPath(predecessors, node) {
         const path = [];
         while (node !== null) {
@@ -336,20 +324,29 @@ class Graph {
         return path;
     }
 
-    // dfs(v)
+    // ** GETTERS **
+
+    getCurrentLength(){
+        return this.AdjList.size;
+    }
+
+    getCurrentList(){
+        return this.AdjList.keys();
+    }
 }
 
+//This is the global instance of our graph.
+var userInterface = new UI();
+var graph = new Graph();
+
+// ****** EVENT LISTENERS ******
+
+//Window resize event
 window.addEventListener("resize", function () {
     windowResize();
 });
 
-function windowResize(){
-    LINE_HOLDER.setAttribute("width", ""+ window.innerWidth);
-    LINE_HOLDER.setAttribute("height", ""+ window.innerHeight);
-}
-
-var graph = new Graph();
-
+//These events deal with user input
 document.addEventListener('DOMContentLoaded', function () {
 
         var currentElementTarget = null;
@@ -362,57 +359,56 @@ document.addEventListener('DOMContentLoaded', function () {
             //Current target we are over.
             currentElementTarget = event.target;
 
-            //If we aren't interacting with the UI.
-            if (!isMouseOnControls) {
-                //Or a node that already exists
-                if(graph.isEventTargetInMap(currentElementTarget) == false){
-                        resetHighlighting();
-                        console.log("Placing new node")
-                        //Create the new node physically
-                        const newNode = document.createElement("div");
-                        newNode.className = "circle";
-                        newNode.style.width = NODE_WIDTH + "px";
-                        newNode.style.height = NODE_HEIGHT + "px";
-                        newNode.style.top = (y-NODE_HEIGHT/2) + "px";
-                        newNode.style.left = (x-NODE_WIDTH/2) + "px";
-                        newNode.innerHTML = "<p>" + ALPHABET[graph.currentLength()] + "</p>";
-                        newNode.id = ALPHABET[graph.currentLength()];
-                        document.body.appendChild(newNode);
+            //If we aren't interacting with the UI. 
+            if (!userInterface.isMouseOnControls) {
+                //Or a node that already exists. We also cant create more nodes than letters in the alphabet.
+                if(graph.isEventTargetInMap(currentElementTarget) == false && graph.getCurrentLength() < ALPHABET.length){
+                    console.log("Placing new node")
 
-                        //We want to add this new node to the graph
-                        //Each is a TUPLE, where we have a reference to the DOM element and a letter associated with it.
-                        graph.addVertex([newNode, ALPHABET[graph.currentLength()]]);
-                        
-                        //update our drop down with the correct list of nodes
-                        updateDropDown();
-
-                        //Setting hovering = true because if we create a node we are automatically inside it.
-                        hovering = true;
+                    //Remove and previously defined paths.
+                    resetHighlighting();
                     
+                    //Create the new node physically
+                    const newNode = document.createElement("div");
+                    newNode.className = "circle";
+                    newNode.style.width = NODE_WIDTH + "px";
+                    newNode.style.height = NODE_HEIGHT + "px";
+                    newNode.style.top = (y-NODE_HEIGHT/2) + "px";
+                    newNode.style.left = (x-NODE_WIDTH/2) + "px";
+                    newNode.innerHTML = "<p>" + ALPHABET[graph.getCurrentLength()] + "</p>";
+                    newNode.id = ALPHABET[graph.getCurrentLength()];
+                    document.body.appendChild(newNode);
+
+                    //We want to add this new node to the graph
+                    //Each is a, where we have a reference to the DOM element and a letter associated with it.
+                    graph.addVertex([newNode, ALPHABET[graph.getCurrentLength()]]);
+                    
+                    //update our drop down with the correct list of nodes
+                    updateDropDown();
                 } else {
                     //If we are clicking on a node.
                     node = graph.returnNodeFromLetter(currentElementTarget.id);
-                    isMouseDown = true;
+                    userInterface.isMouseDown = true;
                 }
             }
         });
 
         document.addEventListener('mouseup', function (event) {
-            //Current Element we are hovering over
+            //Current Element we are over at this moment.
             currentElementTarget = event.target;
 
-            if(isMouseDown == true && shiftPressed != true) {
+            if(userInterface.isMouseDown == true && userInterface.shiftPressed != true) {
                 //If the target we are on is part of our node list
                 if (graph.isEventTargetInMap(currentElementTarget)) {
-                    //Remove the line
+                    //Remove the placeholder line
                     linePlaceHolderReset();
 
-                    //Current reference to node in graph.
+                    //Current reference to node in graph. The other is currentNewLine.startingNode
                     endingNode = graph.returnNodeFromLetter(currentElementTarget.id);
 
                     //We want to make sure the line is fully straight each time.
-                    startingNodeX = parseInt(currentNewLine.startingNode[0].style.left.slice(0,-2)) + NODE_WIDTH/2;
-                    startingNodeY = parseInt(currentNewLine.startingNode[0].style.top.slice(0,-2)) + NODE_WIDTH/2;
+                    startingNodeX = parseInt(userInterface.currentNewLine.startingNode[0].style.left.slice(0,-2)) + NODE_WIDTH/2;
+                    startingNodeY = parseInt(userInterface.currentNewLine.startingNode[0].style.top.slice(0,-2)) + NODE_WIDTH/2;
                     endingNodeX = parseInt(endingNode[0].style.left.slice(0,-2)) + NODE_WIDTH/2;
                     endingNodeY = parseInt(endingNode[0].style.top.slice(0,-2)) + NODE_WIDTH/2;
 
@@ -430,37 +426,30 @@ document.addEventListener('DOMContentLoaded', function () {
                     LINE_HOLDER.appendChild(newNodeLine);
 
                     //Add it to our model graph.
-                    console.log("New connection: " + currentNewLine.startingNode[1] + " <-> " + endingNode[1])
-                    graph.addEdge(currentNewLine.startingNode, endingNode, newNodeLine);
+                    console.log("New connection: " + userInterface.currentNewLine.startingNode[1] + " <-> " + endingNode[1])
+
+                    //Finally, we add it to our model.
+                    graph.addEdge(userInterface.currentNewLine.startingNode, endingNode, newNodeLine);
                 } else {
                     //Delete the line placeholder, we don't want you silly.
                     linePlaceHolderReset();
-
-                    //If we aren't over another node, hovering should be equal to false now.
-                    //This is a sorta redundant check but I wanna do it anyways.
-                    if (!graph.isEventTargetInMap(currentElementTarget)) {
-                        hovering = false
-                    }
                 }
             }
 
             //Set isMouseDown to false
-            isMouseDown = false; 
+            userInterface.isMouseDown = false; 
         });
 
         document.addEventListener('mousemove', function (event) {
+            //We keep track of where the mouse is.
             var x = event.clientX;
             var y = event.clientY;
-            
-            // currentElementTarget = event.target;
-
-            handleNodeAction()
 
             //Here is is the dragging functionality
-            if(isMouseDown){
+            if(userInterface.isMouseDown){
 
                 //For moving the nodes around!
-                if(shiftPressed){
+                if(userInterface.shiftPressed){
                     resetHighlighting();
 
                     //Move node
@@ -490,24 +479,24 @@ document.addEventListener('DOMContentLoaded', function () {
                 }
 
                 //For connecting nodes!
-                if(!shiftPressed){
+                if(!userInterface.shiftPressed){
                     if(node != undefined){
                         //If the target we are on is part of our node list
                         if (graph.isEventTargetInMap(currentElementTarget)) {
                             node = graph.returnNodeFromLetter(currentElementTarget.id);
 
-                            currentNewLine.startingNode = node;
-                            currentNewLine.x1 = "" + (parseInt(node[0].style.left.slice(0,-2)) + NODE_WIDTH/2);
-                            currentNewLine.y1 = "" + (parseInt(node[0].style.top.slice(0,-2)) + NODE_HEIGHT/2);
-                            currentNewLine.x2 = "" + x;
-                            currentNewLine.y2 = "" + y;
+                            userInterface.currentNewLine.startingNode = node;
+                            userInterface.currentNewLine.x1 = "" + (parseInt(node[0].style.left.slice(0,-2)) + NODE_WIDTH/2);
+                            userInterface.currentNewLine.y1 = "" + (parseInt(node[0].style.top.slice(0,-2)) + NODE_HEIGHT/2);
+                            userInterface.currentNewLine.x2 = "" + x;
+                            userInterface.currentNewLine.y2 = "" + y;
 
-                            linePlaceHolder.setAttribute("stroke", "#37345e");
-                            linePlaceHolder.setAttribute("stroke-width", "10");
-                            linePlaceHolder.setAttribute("x1", "" + (parseInt(node[0].style.left.slice(0,-2)) + NODE_WIDTH/2));
-                            linePlaceHolder.setAttribute("x2", "" + x);
-                            linePlaceHolder.setAttribute("y1", "" + (parseInt(node[0].style.top.slice(0,-2)) + NODE_HEIGHT/2));
-                            linePlaceHolder.setAttribute("y2", "" + y);
+                            userInterface.linePlaceHolder.setAttribute("stroke", "#37345e");
+                            userInterface.linePlaceHolder.setAttribute("stroke-width", "10");
+                            userInterface.linePlaceHolder.setAttribute("x1", "" + (parseInt(node[0].style.left.slice(0,-2)) + NODE_WIDTH/2));
+                            userInterface.linePlaceHolder.setAttribute("x2", "" + x);
+                            userInterface.linePlaceHolder.setAttribute("y1", "" + (parseInt(node[0].style.top.slice(0,-2)) + NODE_HEIGHT/2));
+                            userInterface.linePlaceHolder.setAttribute("y2", "" + y);
                         }
                     }
                 }
@@ -516,92 +505,86 @@ document.addEventListener('DOMContentLoaded', function () {
 
         document.addEventListener("keydown", function (event) {
             if(event.key == "Shift"){
-                shiftPressed = true
+                userInterface.shiftPressed = true
                 // console.log("Shift is pressed")
             }
         });
 
         document.addEventListener("keyup", function (event) {
             if(event.key == "Shift"){
-                shiftPressed = false
+                userInterface.shiftPressed = false
                 // console.log("Shift is released")
             }
         });
 });
 
-// Handle some node specific functionality
-function handleNodeAction(){
-    for([node, value] of graph.AdjList){
-        var letter = node[1]
-        var element = node[0]
-
-        element.addEventListener('mouseout', function (event) {
-            if(isMouseDown != true){
-                hovering = false;
-            }
-        });
-
-        element.addEventListener('mouseover', function (event) {
-            hovering = true;
-        });
-    }
-}
-
 CONTROL_PANEL.addEventListener('mouseenter', function() {
     // The mouse is over the "controls" div or its children
-    isMouseOnControls = true;
+    userInterface.isMouseOnControls = true;
 });
 
 CONTROL_PANEL.addEventListener('mouseleave', function() {
     // The mouse left the "controls" div and its children
-    isMouseOnControls = false;
+    userInterface.isMouseOnControls = false;
 });
 
-function linePlaceHolderReset(){
-    linePlaceHolder.setAttribute("stroke", "#37345e");
-    linePlaceHolder.setAttribute("stroke-width", "0");
-    linePlaceHolder.setAttribute("x1", "0");
-    linePlaceHolder.setAttribute("x2", "0");
-    linePlaceHolder.setAttribute("y1", "0");
-    linePlaceHolder.setAttribute("y2", "0");
+// ******** Front End Functionality ***********
+
+//Called on window resize
+function windowResize(){
+    LINE_HOLDER.setAttribute("width", ""+ window.innerWidth);
+    LINE_HOLDER.setAttribute("height", ""+ window.innerHeight);
 }
 
+//Used to delete the place-holder line.
+function linePlaceHolderReset(){
+    userInterface.linePlaceHolder.setAttribute("stroke", "#37345e");
+    userInterface.linePlaceHolder.setAttribute("stroke-width", "0");
+    userInterface.linePlaceHolder.setAttribute("x1", "0");
+    userInterface.linePlaceHolder.setAttribute("x2", "0");
+    userInterface.linePlaceHolder.setAttribute("y1", "0");
+    userInterface.linePlaceHolder.setAttribute("y2", "0");
+}
+
+//Clears the current graph
 function clearGraph(){
     console.log("Clearing Board...")
     graph.clear();
 }
 
+//Deletes a specific node
 function deleteNode(){
     resetHighlighting();
     graph.removeNodeFromLetter(NODE_SELECTOR.value);
     updateDropDown();
 }
 
+//Prints the graph the console.
 function printGraph(){
     graph.printGraph();
 }
 
+//Updates drop down options once new nodes are added or removed.
 function updateDropDown(){
     NODE_SELECTOR.innerHTML = "";
     D_TWO_SELECTOR.innerHTML = "";
     D_ONE_SELECTOR.innerHTML = "";
-    for (node of graph.currentList()){
-        var opt = document.createElement('option');
-        opt.value = node[1];
-        opt.innerHTML = node[1];
-        var two = document.createElement('option');
-        two.value = node[1];
-        two.innerHTML = node[1];
-        var three = document.createElement('option');
-        three.value = node[1];
-        three.innerHTML = node[1];
-        D_TWO_SELECTOR.appendChild(two);
-        D_ONE_SELECTOR.appendChild(opt);
-        NODE_SELECTOR.appendChild(three);
+    for (node of graph.getCurrentList()){
+        D_TWO_SELECTOR.appendChild(createDropDownOption(node));
+        D_ONE_SELECTOR.appendChild(createDropDownOption(node));
+        NODE_SELECTOR.appendChild(createDropDownOption(node));
     }
-
 }
 
+//Helper function used to efficiently create new dropdown elements in the dom.
+function createDropDownOption(node){
+    var newOption = document.createElement('option');
+    newOption.value = node[1];
+    newOption.innerHTML = node[1];
+    return newOption;
+}
+
+//Handles front end for dijkstra algorithm.
 function dijkstrasPath(){
     resetHighlighting();
     var letter = D_ONE_SELECTOR.value;
@@ -625,11 +608,11 @@ function dijkstrasPath(){
         element[0].style.borderColor = "#ba4c4c";
         element[0].style.color = "#ba4c4c";
     }
-
 }
 
+//Resets all the highlighting after a path is found.
 function resetHighlighting(){
-    var currentNodes = graph.currentList();
+    var currentNodes = graph.getCurrentList();
     for(var node of currentNodes){
         node[0].style.borderColor = "#3e37a1";
         node[0].style.color = "#3e37a1";
@@ -638,20 +621,16 @@ function resetHighlighting(){
         }
     }
 }
-  
-function calculateLineLength(x1, y1, x2, y2) {
-    var distance = Math.sqrt(Math.pow(x2 - x1, 2) + Math.pow(y2 - y1, 2));
-    return distance;
-}
 
+//Handles determination for wether line weight should be taken into account.
 function handleCheckBox() {
     // Get the checkbox
     var checkBox = document.getElementById("weighted");
   
     // If the checkbox is checked, display the output text
     if (checkBox.checked == true){
-        useWeighted = true;
+        userInterface.useWeighted = true;
     } else {
-        useWeighted = false;
+        userInterface.useWeighted = false;
     }
-  }
+}

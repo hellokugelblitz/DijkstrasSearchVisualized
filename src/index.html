@@ -12,14 +12,13 @@
 <body onload="windowResize()">
 
     <div class="controls" id="controls">
-        <p class="title">Controls:</p>
+        <h2 class="title">Controls:</h2>
 
         <select name="selector-one" id="selector-one">
         </select>
 
         <button type="button" onclick="deleteNode()" >Delete Node</button>
-        <button style="margin-top: 5px;" type="button" onclick="clearGraph()" >Clear Graph</button>
-        <button style="margin-top: 5px;" type="button" onclick="printGraph()" >Print Graph</button>
+        <!-- <button style="margin-top: 5px;" type="button" onclick="printGraph()" >Print Graph</button> -->
         <br>
 
         <select name="selector-two" id="selector-two">
@@ -32,6 +31,7 @@
         <input style="margin-top: 5px;" type="checkbox" id="weighted" onclick="handleCheckBox()">
         <label for="weighted">Use Weighted Graph</label>
         <button style="margin-top: 5px;" type="button" onclick="resetHighlighting()" >Reset Highlighting</button><br>
+        <button style="margin-top: 5px;" type="button" onclick="clearGraph()" >Clear Graph</button>
     </div>
 
     <svg style="z-index: 1;" id="lineHolder" width="4000px" height="4000px" version="1.1" xmlns="http://www.w3.org/2000/svg">

@@ -41,13 +41,10 @@ body {
     font-size:x-large;
 }
 
-.circle:hover {
-    width: 55px;
-    height: 55px;
-}
 
+
+/* FOR THE NODES */
 .circle p {
-    
     position: absolute;
     text-align:center; 
     vertical-align: middle;
@@ -56,12 +53,17 @@ body {
     margin-top: 20%;
 
     pointer-events:none;
-
     -moz-user-select: -moz-none;
    -khtml-user-select: none;
    -webkit-user-select: none;
    -ms-user-select: none;
    user-select: none;
+}
+
+/* Tried messing around with hovering over the nodes. */
+.circle:hover {
+    width: 55px;
+    height: 55px;
 }
 
 .controls {
@@ -75,21 +77,14 @@ body {
     width: 180px;
     height: 170px;
     left: 10px;
-
-    /* pointer-events:none;
-
-    -moz-user-select: -moz-none;
-    -khtml-user-select: none;
-    -webkit-user-select: none;
-    -ms-user-select: none;
-    user-select: none; */
+    border: 3px solid black;
 }
 
-/* .title {
-    position: absolute;
-    top: 0px;
-    font-size: x-large;
-} */
+.title {
+    font-size: xx-large;
+    margin-top: 0px;
+    margin-bottom: 5px;
+}
 
 .line {
     border-bottom: 1px solid #888;
