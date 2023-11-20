@@ -13,5 +13,5 @@ Here is a screenshot of the UI:
 ![alt text](demo.png)
 
 ## TODO / Future Improvements
-* Bug Fixing
-* * There are some occasional issues with the weighted graph functionality, need to pin that down.
+1. Bug Fixing
+..* There are some occasional issues with the weighted graph functionality, need to pin that down.
