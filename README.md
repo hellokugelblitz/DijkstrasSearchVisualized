@@ -13,6 +13,7 @@ Here is a screenshot of the UI:
 ![alt text](demo.png)
 
 ## TODO / Future Improvements
-1. Bug Fixing
-.. * There are some occasional issues with the weighted graph functionality, need to pin that down.
+1. Bug Fixing -- There are some occasional issues with the weighted graph functionality, need to pin that down.
+2. Better UI/Colors -- Im not a huge fan of my rather depressing color pallete
+3. Setup a live demo!
    
