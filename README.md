@@ -11,3 +11,7 @@ You can create your own dynamic graph with as many nodes as you'd like.
 Here is a screenshot of the UI:
 <br>
 ![alt text](demo.png)
+
+## TODO / Future Improvements
+* Bug Fixing
+..* There are some occasional issues with the weighted graph functionality, need to pin that down.
