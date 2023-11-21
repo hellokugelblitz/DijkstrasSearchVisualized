@@ -1,5 +1,5 @@
 # Dijkstras Visualized 
-Over the past couple days I have been playing around with Dijkstra's shortest path algorithm. I used my JS, HTML, and CSS skills to demo it 🚀<br>
+Over the past couple days I have been playing around with Dijkstra's shortest path algorithm. I used my JS, HTML, and CSS skills to demo it 🚀
 You can create your own dynamic graph with as many nodes as you'd like.
 
 [Check out the live version!](https://people.rit.edu/jgl2651/JACK/Projects/DV/)
