@@ -11,7 +11,6 @@ You can create your own dynamic graph with as many nodes as you'd like.
 * **Use the control panel** to handle specific actions.
 
 ### *Here is a screenshot of the UI:*
-<br>
 ![alt text](demo.png)
 
 ## TODO / Future Improvements
